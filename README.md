@@ -143,8 +143,3 @@ scripts/seed.js   demo data through the public API
 - TypeScript for Cloud Code, and a CI pipeline running lint and tests on every push.
 - Email verification and password reset with a mail adapter.
 - Pagination and sorting conventions documented for clients (e.g. newest posts first).
-
-## Generative AI
-
-The brief left the generative-AI policy unset. An AI coding assistant was used while
-building this project.
