@@ -8,3 +8,4 @@
 require('./triggers/post');
 require('./triggers/comment');
 require('./functions/toggle-like');
+require('./functions/user-stats');
