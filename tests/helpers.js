@@ -24,6 +24,8 @@ function getFreePort() {
  * Tests talk to the API over HTTP only, like the black-box grader.
  */
 async function startTestServer() {
+  // Tests use their own master key, so the config never falls back to a random one.
+  process.env.PARSE_MASTER_KEY = MASTER_KEY;
   const port = await getFreePort();
   const server = await startServer({ port, masterKey: MASTER_KEY, databaseURI: '', logLevel: 'silent' });
 
