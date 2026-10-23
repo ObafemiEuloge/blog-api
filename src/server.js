@@ -4,6 +4,7 @@ const path = require('node:path');
 const express = require('express');
 const { ParseServer } = require('parse-server');
 const { loadConfig } = require('./config');
+const schema = require('./schema');
 
 /**
  * Starts an in-memory MongoDB when no DATABASE_URI is provided, so the API runs on a
@@ -30,8 +31,19 @@ function buildParseOptions(config, databaseURI) {
     serverURL: `http://localhost:${config.port}${config.mountPath}`,
     cloud: path.join(__dirname, '..', 'cloud', 'main.js'),
     logLevel: config.logLevel,
+    // Classes, fields and CLPs are created by code at startup.
+    schema,
     // Clients may only work with the classes declared by the server.
     allowClientClassCreation: false,
+    // New users get a public-read ACL so that posts can include their author.
+    enforcePrivateUsers: false,
+    // Email stays hidden from other users; a user can still read their own.
+    protectedFields: { _User: { '*': ['email'] } },
+    protectedFieldsOwnerExempt: true,
+    protectedFieldsSaveResponseExempt: false,
+    protectedFieldsTriggerExempt: true,
+    // Master key only accepted from the local machine.
+    masterKeyIps: ['127.0.0.1', '::1'],
   };
 }
 
