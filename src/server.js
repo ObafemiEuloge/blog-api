@@ -1,6 +1,10 @@
 'use strict';
 
 const path = require('node:path');
+
+// Parse Server creates a ./logs folder when it is first required; log to the console only.
+process.env.PARSE_SERVER_LOGS_FOLDER ??= 'null';
+
 const express = require('express');
 const { ParseServer } = require('parse-server');
 const { loadConfig } = require('./config');
@@ -30,7 +34,10 @@ function buildParseOptions(config, databaseURI) {
     databaseURI,
     serverURL: `http://localhost:${config.port}${config.mountPath}`,
     cloud: path.join(__dirname, '..', 'cloud', 'main.js'),
-    logLevel: config.logLevel,
+    // Logs go to stdout/stderr only (no ./logs folder); LOG_LEVEL=silent mutes them.
+    logsFolder: null,
+    logLevel: config.logLevel === 'silent' ? 'error' : config.logLevel,
+    silent: config.logLevel === 'silent',
     // Classes, fields and CLPs are created by code at startup.
     schema,
     // Clients may only work with the classes declared by the server.
@@ -44,6 +51,22 @@ function buildParseOptions(config, databaseURI) {
     protectedFieldsTriggerExempt: true,
     // Master key only accepted from the local machine.
     masterKeyIps: ['127.0.0.1', '::1'],
+    readOnlyMasterKeyIps: ['127.0.0.1', '::1'],
+    allowAggregationForReadOnlyMasterKey: false,
+    // Opt in now to the safer upcoming defaults (also silences deprecation warnings).
+    fileUpload: { allowedFileUrlDomains: [] },
+    pages: { encodePageParamHeaders: true },
+    requestComplexity: {
+      includeDepth: 10,
+      includeCount: 100,
+      subqueryDepth: 10,
+      queryDepth: 10,
+      graphQLDepth: 20,
+      graphQLFields: 200,
+      batchRequestLimit: 100,
+    },
+    installation: { duplicateDeviceTokenActionEnforceAuth: true },
+    enableLiveQueryClassLevelPermissionRoles: true,
   };
 }
 
