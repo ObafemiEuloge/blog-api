@@ -6,3 +6,4 @@
  */
 
 require('./triggers/post');
+require('./triggers/comment');
