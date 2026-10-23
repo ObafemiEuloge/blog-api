@@ -74,7 +74,8 @@ async function startServer(overrides = {}) {
     url: `http://localhost:${config.port}${config.mountPath}`,
     config,
     async close() {
-      await new Promise((resolve) => httpServer.close(resolve));
+      // handleShutdown closes the HTTP server it is attached to, then the database adapter.
+      parseServer.server = httpServer;
       await parseServer.handleShutdown();
       await database.stop();
     },
