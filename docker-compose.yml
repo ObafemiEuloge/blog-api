@@ -1,0 +1,28 @@
+services:
+  mongo:
+    image: mongo:7
+    restart: unless-stopped
+    volumes:
+      - mongo-data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping')"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      mongo:
+        condition: service_healthy
+    ports:
+      - "1337:1337"
+    environment:
+      # Read from the shell or from .env; compose refuses to start without it.
+      PARSE_MASTER_KEY: ${PARSE_MASTER_KEY:?PARSE_MASTER_KEY is required}
+      DATABASE_URI: mongodb://mongo:27017/blog-app
+      PORT: 1337
+
+volumes:
+  mongo-data:
