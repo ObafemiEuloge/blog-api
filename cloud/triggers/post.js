@@ -2,6 +2,7 @@
 
 const { requireText, validationError } = require('../lib/validation');
 const { publicReadAuthorWrite } = require('../lib/acl');
+const { destroyAllPointingTo } = require('../lib/posts');
 
 const TITLE_LENGTH = { min: 3, max: 120 };
 const BODY_LENGTH = { min: 1, max: 5000 };
@@ -39,4 +40,12 @@ Parse.Cloud.beforeSave('Post', (request) => {
     // The author cannot change who may edit the post either.
     post.setACL(original.getACL());
   }
+});
+
+// R6: deleting a post deletes its comments and likes.
+Parse.Cloud.afterDelete('Post', async ({ object: post }) => {
+  await Promise.all([
+    destroyAllPointingTo('Comment', 'post', post),
+    destroyAllPointingTo('Like', 'post', post),
+  ]);
 });
