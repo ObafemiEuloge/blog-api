@@ -9,6 +9,7 @@ const express = require('express');
 const { ParseServer } = require('parse-server');
 const { loadConfig } = require('./config');
 const schema = require('./schema');
+const { ensureIndexes } = require('./indexes');
 
 /**
  * Starts an in-memory MongoDB when no DATABASE_URI is provided, so the API runs on a
@@ -86,6 +87,7 @@ async function startServer(overrides = {}) {
 
   const parseServer = new ParseServer(buildParseOptions(config, database.databaseURI));
   await parseServer.start();
+  await ensureIndexes(database.databaseURI);
 
   const app = express();
   app.disable('x-powered-by');
